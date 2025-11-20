@@ -19,7 +19,6 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            /* Скрываем карту по умолчанию, пока не будет введен пароль */
             visibility: hidden; 
         }
     </style>
@@ -31,21 +30,14 @@
 <script>
     // --- 1. ФУНКЦИЯ ПРОВЕРКИ ПАРОЛЯ ---
     function checkPassword() {
-        // Установите ваш пароль здесь
-        const CORRECT_PASSWORD = "Ambassadrori20112025"; 
-
-        // Запрашиваем пароль
+        const CORRECT_PASSWORD = "Ambassadori20112025"; 
         let password = prompt("Введите пароль для доступа к карте:");
 
-        // Проверяем пароль
         if (password === CORRECT_PASSWORD) {
-            // Если пароль верен, показываем карту и запускаем инициализацию
             document.getElementById('map').style.visibility = 'visible';
             initializeMap();
         } else {
-            // Если пароль неверен, показываем сообщение об ошибке
             alert("Неверный пароль. Доступ запрещен.");
-            // Можно перенаправить пользователя или просто остаться на белом экране
             document.body.innerHTML = "<h1>Доступ запрещен</h1>"; 
         }
     }
@@ -53,9 +45,6 @@
     // --- 2. ОСНОВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КАРТЫ ---
     function initializeMap() {
         
-        // -------------------------
-        // Инициализация карты
-        // -------------------------
         var map = L.map('map', {
             center: [41.6598, 41.675],
             zoom: 19,
@@ -63,8 +52,6 @@
             maxZoom: 22
         });
 
-        // Поскольку карта была скрыта, Leaflet не знает ее размер. 
-        // Нужно обязательно вызвать invalidateSize() после того, как карта станет видимой.
         map.invalidateSize(); 
 
         // -------------------------
@@ -84,7 +71,10 @@
                 minNativeZoom: 19,
                 maxNativeZoom: 22,
                 minZoom: 14,
-                maxZoom: 22
+                maxZoom: 22,
+                // --- ОПТИМИЗАЦИЯ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ ---
+                keepBuffer: 2,           // Уменьшаем буфер кэша тайлов (снижает потребление RAM)
+                updateWhenIdle: true     // Запрашиваем тайлы только после остановки движения/зуммирования
             }
         ).addTo(map);
 
@@ -97,7 +87,10 @@
                 minNativeZoom: 19,
                 maxNativeZoom: 22,
                 minZoom: 14,
-                maxZoom: 22
+                maxZoom: 22,
+                // --- ОПТИМИЗАЦИЯ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ ---
+                keepBuffer: 2,           // Уменьшаем буфер кэша тайлов
+                updateWhenIdle: true     // Запрашиваем тайлы только после остановки
             }
         ).addTo(map);
 
@@ -117,7 +110,6 @@
         L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
     }
 
-    // Запускаем проверку пароля при загрузке страницы
     window.onload = checkPassword;
 
 </script>
