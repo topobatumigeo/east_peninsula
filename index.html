@@ -4,16 +4,13 @@
     <title>Orthomosaic — Leaflet</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <link 
         rel="stylesheet" 
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
-
     <script 
         src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
     </script>
-
     <style>
         html, body, #map {
             height: 100%;
@@ -24,11 +21,8 @@
     </style>
 </head>
 <body>
-
 <div id="map"></div>
-
 <script>
-    // --- 1. ФУНКЦИЯ ПРОВЕРКИ ПАРОЛЯ ---
     function checkPassword() {
         const CORRECT_PASSWORD = "Ambassadori20112025"; 
         let password = prompt("Введите пароль для доступа к карте:");
@@ -38,13 +32,11 @@
             initializeMap();
         } else {
             alert("Неверный пароль. Доступ запрещен.");
-            document.body.innerHTML = "<h1>Доступ запрещен</h1>"; 
+            document.body.innerHTML = "<h1>Доступ запрещен</h1>";
         }
     }
 
-    // --- 2. ОСНОВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КАРТЫ ---
     function initializeMap() {
-        
         var map = L.map('map', {
             center: [41.6598, 41.675],
             zoom: 19,
@@ -52,67 +44,28 @@
             maxZoom: 22
         });
 
-        map.invalidateSize(); 
+        // Базовый слой
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 22
+        }).addTo(map);
 
-        // -------------------------
-        // Базовый спутниковый слой
-        // -------------------------
-        var satellite = L.tileLayer(
-            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            { maxZoom: 22 }
-        ).addTo(map);
+        // Ортофото слои
+        var orthoEast = L.tileLayer('https://topobatumigeo.github.io/east_peninsula/{z}/{x}/{y}.png', {
+            minZoom: 14,
+            maxNativeZoom: 19,
+            maxZoom: 22,
+            crossOrigin: true  // <-- важно для CORS
+        }).addTo(map);
 
-        // -------------------------
-        // Твои ортофото — EAST
-        // -------------------------
-        var orthoEast = L.tileLayer(
-            'https://topobatumigeo.github.io/east_peninsula/{z}/{x}/{y}.png',
-            {
-                minNativeZoom: 19,
-                maxNativeZoom: 22,
-                minZoom: 14,
-                maxZoom: 22,
-                // --- ОПТИМИЗАЦИЯ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ ---
-                keepBuffer: 2,           // Уменьшаем буфер кэша тайлов (снижает потребление RAM)
-                updateWhenIdle: true     // Запрашиваем тайлы только после остановки движения/зуммирования
-            }
-        ).addTo(map);
-
-        // -------------------------
-        // Твои ортофото — WEST
-        // -------------------------
-        var orthoWest = L.tileLayer(
-            'https://topobatumigeo.github.io/west_peninsula/{z}/{x}/{y}.png',
-            {
-                minNativeZoom: 19,
-                maxNativeZoom: 22,
-                minZoom: 14,
-                maxZoom: 22,
-                // --- ОПТИМИЗАЦИЯ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ ---
-                keepBuffer: 2,           // Уменьшаем буфер кэша тайлов
-                updateWhenIdle: true     // Запрашиваем тайлы только после остановки
-            }
-        ).addTo(map);
-
-
-        // -------------------------
-        // Переключатель слоёв
-        // -------------------------
-        var baseMaps = {
-            "Satellite": satellite
-        };
-
-        var overlayMaps = {
-            "East peninsula": orthoEast,
-            "West peninsula": orthoWest
-        };
-
-        L.control.layers(baseMaps, overlayMaps, { collapsed: false }).addTo(map);
+        var orthoWest = L.tileLayer('https://topobatumigeo.github.io/west_peninsula/{z}/{x}/{y}.png', {
+            minZoom: 14,
+            maxNativeZoom: 19,
+            maxZoom: 22,
+            crossOrigin: true  // <-- важно для CORS
+        }).addTo(map);
     }
 
     window.onload = checkPassword;
-
 </script>
-
 </body>
 </html>
