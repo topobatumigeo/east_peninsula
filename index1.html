@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Orthomosaic — Leaflet</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link 
+        rel="stylesheet" 
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script 
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <style>
+        html, body, #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            visibility: hidden; 
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script>
+    function checkPassword() {
+        const CORRECT_PASSWORD = "Ambassadori20112025"; 
+        let password = prompt("Введите пароль для доступа к карте:");
+
+        if (password === CORRECT_PASSWORD) {
+            document.getElementById('map').style.visibility = 'visible';
+            initializeMap();
+        } else {
+            alert("Неверный пароль. Доступ запрещен.");
+            document.body.innerHTML = "<h1>Доступ запрещен</h1>";
+        }
+    }
+
+    function initializeMap() {
+        var map = L.map('map', {
+            center: [41.6598, 41.675],
+            zoom: 19,
+            minZoom: 14,
+            maxZoom: 22
+        });
+
+        // Базовый слой
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 22
+        }).addTo(map);
+
+        // Ортофото слои
+        var orthoEast = L.tileLayer('https://topobatumigeo.github.io/east_peninsula/{z}/{x}/{y}.png', {
+            minZoom: 14,
+            maxNativeZoom: 19,
+            maxZoom: 22,
+            crossOrigin: true  // <-- важно для CORS
+        }).addTo(map);
+
+        var orthoWest = L.tileLayer('https://topobatumigeo.github.io/west_peninsula/{z}/{x}/{y}.png', {
+            minZoom: 14,
+            maxNativeZoom: 19,
+            maxZoom: 22,
+            crossOrigin: true  // <-- важно для CORS
+        }).addTo(map);
+    }
+
+    window.onload = checkPassword;
+</script>
+</body>
+</html>
