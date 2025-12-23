@@ -1,117 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Orthomosaic — OpenLayers</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+    <head>
+        <title>Orthomosaic</title>
+        <meta charset="utf-8" />
+        <style>
+            html, body, #map {
+                height: 100%;
+                margin: 0px;
+                padding: 0px
+            }
+        </style>
 
-    <!-- OpenLayers CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.1.0/ol.css">
+        <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+        <script type="text/javascript">
+            var map;
 
-    <!-- OpenLayers JS -->
-    <script src="https://cdn.jsdelivr.net/npm/ol@v9.1.0/dist/ol.js"></script>
+            function initialize() {
+                var options = {
+                    zoom: 19,
+                    center: new google.maps.LatLng(41.66, 41.6757),
+                    mapTypeId: google.maps.MapTypeId.SATELLITE
+                };
 
-    <style>
-        html, body, #map {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-        }
+                map = new google.maps.Map(document.getElementById("map"), options);
 
-        .layerSwitcher {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: white;
-            padding: 8px;
-            border-radius: 6px;
-            z-index: 1000;
-        }
-    </style>
-</head>
-<body>
+                var bounds = {
+                    19: [[322832, 322844], [195279, 195298]],
+                    20: [[645665, 645688], [390559, 390596]],
+                    21: [[1291331, 1291377], [781119, 781193]],
+                    22: [[2582663, 2582755], [1562238, 1562387]]
+                };
 
-<div id="map"></div>
+                var imageMapType = new google.maps.ImageMapType({
+                    getTileUrl: function(coord, zoom) {
+                        if (zoom < 19 || zoom > 22 ||
+                            bounds[zoom][0][0] > coord.x || coord.x > bounds[zoom][0][1] ||
+                            bounds[zoom][1][0] > coord.y || coord.y > bounds[zoom][1][1]) {
+                            return null;
+                        }
 
-<script>
+                        return zoom + "/" + coord.x + "/" + coord.y + ".png";
+                    },
+                    tileSize: new google.maps.Size(256, 256)
+                });
 
-    // ------------------------------------------------------------
-    //   БАЗОВЫЙ СПУТНИКОВЫЙ СЛОЙ (ESRI World Imagery)
-    // ------------------------------------------------------------
-    const satellite = new ol.layer.Tile({
-        source: new ol.source.XYZ({
-    url: "https://nt0.napr.gov.ge/NGCache?x={x}&y={y}&z={z}&l=ORTHO_GEORGIA_4",
-    crossOrigin: "anonymous",
-    tilePixelRatio: 1,
-  }),
-  opacity: 1
-});
+                map.overlayMapTypes.push(imageMapType);
+            }
 
-
-    // ------------------------------------------------------------
-    //   ORTHO EAST
-    // ------------------------------------------------------------
-    const orthoEast = new ol.layer.Tile({
-        source: new ol.source.XYZ({
-            url: 'https://topobatumigeo.github.io/east_peninsula/{z}/{x}/{y}.png',
-
-            // Указываем: тайлы существуют только от 19 уровня
-            minZoom: 14,
-            maxZoom: 22,
-            tileGrid: new ol.tilegrid.TileGrid({
-                tileSize: 256,
-                extent: ol.proj.get('EPSG:3857').getExtent(),
-                resolutions: Array.from({length: 23}, (_, z) => 156543.03392804097 / Math.pow(2, z)),
-                // ТАЙЛЫ ЕСТЬ ТОЛЬКО С 19 уровня
-                minZoom: 19
-            })
-        }),
-        visible: true,
-        opacity: 1
-    });
-
-
-    // ------------------------------------------------------------
-    //   ORTHO WEST
-    // ------------------------------------------------------------
-    const orthoWest = new ol.layer.Tile({
-        source: new ol.source.XYZ({
-            url: 'https://topobatumigeo.github.io/west_peninsula/{z}/{x}/{y}.png',
-
-            minZoom: 14,
-            maxZoom: 22,
-            tileGrid: new ol.tilegrid.TileGrid({
-                tileSize: 256,
-                extent: ol.proj.get('EPSG:3857').getExtent(),
-                resolutions: Array.from({length: 23}, (_, z) => 156543.03392804097 / Math.pow(2, z)),
-                minZoom: 19
-            })
-        }),
-        visible: true,
-        opacity: 1
-    });
-
-
-    // ------------------------------------------------------------
-    //   КАРТА
-    // ------------------------------------------------------------
-    const map = new ol.Map({
-        target: 'map',
-        layers: [
-            satellite,
-            orthoEast,
-            orthoWest
-        ],
-        view: new ol.View({
-            center: ol.proj.fromLonLat([41.675, 41.6598]),
-            zoom: 17,
-            minZoom: 14,
-            maxZoom: 22
-        })
-    });
-
-</script>
-
-</body>
+            google.maps.event.addDomListener(window, 'load', initialize);
+        </script>
+    </head>
+    <body>
+        <div id="map"></div>
+    </body>
 </html>
